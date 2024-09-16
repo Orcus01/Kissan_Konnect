@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "27831446852",
+    "firebase_url": "https://kissan-konnect-71479-default-rtdb.firebaseio.com",
+    "project_id": "kissan-konnect-71479",
+    "storage_bucket": "kissan-konnect-71479.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27831446852:android:2a8d219b2aea0169f57b11",
+        "android_client_info": {
+          "package_name": "com.example.kissan_konnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27831446852-n1jlofct9p4ifr7ha4shue93a29qoio8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYbTI2Br1TSUjDaQV5g7TXC3VYUA9cm_A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "27831446852-n1jlofct9p4ifr7ha4shue93a29qoio8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "27831446852-jlc8be41dkvdamuibi88dn4s1rmemlr0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kissanKonnect"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,1 @@
+ /Users/japneetsingh/Downloads/Kissan_Konnects/kissan_konnect/.dart_tool/flutter_build/dc72d046bfada325d7f90258c20707ed/native_assets.yaml: 

@@ -1,0 +1,4 @@
+#Mon Aug 26 01:53:03 IST 2024
+base.0=/Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/app/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

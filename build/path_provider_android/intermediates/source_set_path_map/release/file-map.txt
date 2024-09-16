@@ -1,0 +1,28 @@
+io.flutter.plugins.pathprovider.path_provider_android-fragment-1.7.1-0 /Users/japneetsingh/.gradle/caches/transforms-3/18af5b61aa183e02ca88e5b47427e490/transformed/fragment-1.7.1/res
+io.flutter.plugins.pathprovider.path_provider_android-lifecycle-livedata-2.7.0-1 /Users/japneetsingh/.gradle/caches/transforms-3/20c15bd2207def2729eb159b8f8327a5/transformed/lifecycle-livedata-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-core-runtime-2.2.0-2 /Users/japneetsingh/.gradle/caches/transforms-3/2af6220f018945ed653e27ec5e3f9ff4/transformed/core-runtime-2.2.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-lifecycle-livedata-core-ktx-2.7.0-3 /Users/japneetsingh/.gradle/caches/transforms-3/3748ed3039d2c12f7fd7e737f0f64561/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-lifecycle-process-2.7.0-4 /Users/japneetsingh/.gradle/caches/transforms-3/3b8da64b98adac74d5e7603a4cb4be96/transformed/jetified-lifecycle-process-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-window-java-1.2.0-5 /Users/japneetsingh/.gradle/caches/transforms-3/3f327fa2c493b834e3f3eba8dda85819/transformed/jetified-window-java-1.2.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-activity-1.8.1-6 /Users/japneetsingh/.gradle/caches/transforms-3/4b9b1f9e11480efb337b29949fe00be3/transformed/jetified-activity-1.8.1/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-lifecycle-viewmodel-savedstate-2.7.0-7 /Users/japneetsingh/.gradle/caches/transforms-3/4fc083e668412a8eb2f1f2f9236f1266/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-core-1.13.1-8 /Users/japneetsingh/.gradle/caches/transforms-3/77b2b97480d6eba52e0c157f6d9ec52a/transformed/core-1.13.1/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-profileinstaller-1.3.1-9 /Users/japneetsingh/.gradle/caches/transforms-3/8d464764d8ed145035ede3f7c5a16ea5/transformed/jetified-profileinstaller-1.3.1/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-window-1.2.0-10 /Users/japneetsingh/.gradle/caches/transforms-3/9623224fd5b0f99a6592a725fd58901e/transformed/jetified-window-1.2.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-savedstate-1.2.1-11 /Users/japneetsingh/.gradle/caches/transforms-3/b3a9e5acadfedd365a3f327966174288/transformed/jetified-savedstate-1.2.1/res
+io.flutter.plugins.pathprovider.path_provider_android-lifecycle-viewmodel-2.7.0-12 /Users/japneetsingh/.gradle/caches/transforms-3/b695539b1ca81a68e6e43cb05b52e5d9/transformed/lifecycle-viewmodel-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-lifecycle-livedata-core-2.7.0-13 /Users/japneetsingh/.gradle/caches/transforms-3/c9a47b6c1a2669c7972cbbec0de3f2b2/transformed/lifecycle-livedata-core-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-core-ktx-1.13.1-14 /Users/japneetsingh/.gradle/caches/transforms-3/cc7ca9c791b938477896df374cfe749b/transformed/jetified-core-ktx-1.13.1/res
+io.flutter.plugins.pathprovider.path_provider_android-lifecycle-runtime-2.7.0-15 /Users/japneetsingh/.gradle/caches/transforms-3/d172a81afcdaa7de33d5e1ff4777ef77/transformed/lifecycle-runtime-2.7.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-tracing-1.2.0-16 /Users/japneetsingh/.gradle/caches/transforms-3/dbacdcc6564660e7ff0c573510587e37/transformed/jetified-tracing-1.2.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-startup-runtime-1.1.1-17 /Users/japneetsingh/.gradle/caches/transforms-3/ec90e4b37e36842105f2d01f98cb4f32/transformed/jetified-startup-runtime-1.1.1/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-annotation-experimental-1.4.0-18 /Users/japneetsingh/.gradle/caches/transforms-3/edebfc21b8e05b55f630a52a03678651/transformed/jetified-annotation-experimental-1.4.0/res
+io.flutter.plugins.pathprovider.path_provider_android-jetified-core-1.0.0-19 /Users/japneetsingh/.gradle/caches/transforms-3/ff384d0b8e69815df139cc819fa56c21/transformed/jetified-core-1.0.0/res
+io.flutter.plugins.pathprovider.path_provider_android-main-20 /Users/japneetsingh/.pub-cache/hosted/pub.dev/path_provider_android-2.2.10/android/src/main/res
+io.flutter.plugins.pathprovider.path_provider_android-release-21 /Users/japneetsingh/.pub-cache/hosted/pub.dev/path_provider_android-2.2.10/android/src/release/res
+io.flutter.plugins.pathprovider.path_provider_android-pngs-22 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/generated/res/pngs/release
+io.flutter.plugins.pathprovider.path_provider_android-resValues-23 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/generated/res/resValues/release
+io.flutter.plugins.pathprovider.path_provider_android-rs-24 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/generated/res/rs/release
+io.flutter.plugins.pathprovider.path_provider_android-mergeReleaseResources-25 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/intermediates/incremental/release/mergeReleaseResources/merged.dir
+io.flutter.plugins.pathprovider.path_provider_android-mergeReleaseResources-26 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+io.flutter.plugins.pathprovider.path_provider_android-merged_res-27 /Users/japneetsingh/Downloads/Kissan Konnect/kissan_konnect/build/path_provider_android/intermediates/merged_res/release

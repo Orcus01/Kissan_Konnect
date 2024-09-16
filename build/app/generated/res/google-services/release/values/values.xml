@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">27831446852</string>
+    <string name="google_api_key" translatable="false">AIzaSyCYbTI2Br1TSUjDaQV5g7TXC3VYUA9cm_A</string>
+    <string name="google_app_id" translatable="false">1:27831446852:android:2a8d219b2aea0169f57b11</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCYbTI2Br1TSUjDaQV5g7TXC3VYUA9cm_A</string>
+    <string name="google_storage_bucket" translatable="false">kissan-konnect-71479.appspot.com</string>
+    <string name="project_id" translatable="false">kissan-konnect-71479</string>
+</resources>
