@@ -13,9 +13,9 @@ Kissan Konnect is a Flutter application designed to assist users with plant dise
 ## Screenshots
 
 ![Landing Page](assets/images/landing_page.png)
-![Sign In Page](assets/images/sign_in_page.png)
+![Sign In Page](assets/images/sigin_page.png)
 ![Diagnosis Page](assets/images/diagnosis_page.png)
-![Profile Page](assets/images/profile_page.png)
+![Home Page](assets/images/home_page.png)
 
 ## Getting Started
 
