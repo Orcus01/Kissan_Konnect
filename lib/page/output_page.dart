@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io'; // Only for mobile
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:math';
-
+//THIS IS THE OUTPUT PAGE
 class OutputPage extends StatelessWidget {
   final String imagePath;
   final String diseaseName;

@@ -4,7 +4,7 @@ class ForgetPasswordPage extends StatefulWidget {
   @override
   _ForgetPasswordPageState createState() => _ForgetPasswordPageState();
 }
-
+//THIS IS THE FOREGET PASSWORD PAGE 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
 
