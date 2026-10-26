@@ -23,7 +23,7 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   bool _busy = false;
   String? _error;
-  String _crop = 'Tomato';
+  String? _crop;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _pick(ImageSource source) async {
-    if (_busy) return;
+    if (_busy || _crop == null) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -52,7 +52,7 @@ class _CameraPageState extends State<CameraPage> {
       if (!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute<void>(
           builder: (_) =>
-              OutputPage(imageBytes: bytes, crop: _crop, api: widget.api)));
+              OutputPage(imageBytes: bytes, crop: _crop!, api: widget.api)));
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -133,7 +133,9 @@ class _CameraPageState extends State<CameraPage> {
           DropdownButtonFormField<String>(
               initialValue: _crop,
               decoration: const InputDecoration(
-                  labelText: 'Crop', border: OutlineInputBorder()),
+                  labelText: 'Crop',
+                  hintText: 'Select your crop',
+                  border: OutlineInputBorder()),
               items: widget.crops
                   .map((crop) =>
                       DropdownMenuItem(value: crop, child: Text(crop)))
@@ -147,12 +149,16 @@ class _CameraPageState extends State<CameraPage> {
           sectionLabel('02 / Add one leaf photo'),
           const SizedBox(height: 14),
           FilledButton.icon(
-              onPressed: _busy ? null : () => _pick(ImageSource.camera),
+              onPressed: _busy || _crop == null
+                  ? null
+                  : () => _pick(ImageSource.camera),
               icon: const Icon(Icons.camera_alt_outlined),
               label: const Text('Take a photo')),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-              onPressed: _busy ? null : () => _pick(ImageSource.gallery),
+              onPressed: _busy || _crop == null
+                  ? null
+                  : () => _pick(ImageSource.gallery),
               icon: const Icon(Icons.photo_library_outlined),
               label: const Text('Choose from photos')),
           const SizedBox(height: 12),

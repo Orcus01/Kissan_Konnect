@@ -78,3 +78,17 @@ def test_private_chat_context_and_history(clients,monkeypatch):
     assert b.get('/api/chat').json()['messages']==[]
     b.delete('/api/chat')
     assert len(a.get('/api/chat').json()['messages'])==4
+
+
+def test_new_scan_does_not_inherit_previous_crop(clients, monkeypatch):
+    a, _ = clients
+    contexts = []
+    class Assistant:
+        async def chat(self, question, crop, previous, history=None):
+            contexts.append((crop, previous, history))
+            return {'answer': 'Describe the plant.', 'crop': crop or 'Potato', 'sources': [], 'suggestions': []}
+    monkeypatch.setattr(module, 'ml_client', Assistant())
+    a.post('/api/chat', json={'question': 'How do I grow potatoes?', 'crop': 'Potato'})
+    response = a.post('/api/chat', json={'question': 'Plant identity is unknown. What details should I provide?', 'reset_context': True})
+    assert response.status_code == 200
+    assert contexts[-1] == (None, None, [])

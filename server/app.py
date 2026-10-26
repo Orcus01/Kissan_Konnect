@@ -247,6 +247,8 @@ async def plant_chat(request: Request):
     context_crop = data.get('crop')
     if context_crop is not None and (not isinstance(context_crop,str) or len(context_crop)>80):
         raise HTTPException(422,'Choose a valid crop.')
+    if data.get('reset_context') is True:
+        rows = []
     last_reply = next((json.loads(row[2]) for row in rows if row[0]=='assistant' and row[2]),{})
     previous_question = next((row[1] for row in rows if row[0]=='user'),None)
     history=[{'role':row[0],'content':row[1][:900]} for row in reversed(rows[:6])]

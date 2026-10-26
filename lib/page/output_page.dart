@@ -12,7 +12,7 @@ class OutputPage extends StatefulWidget {
   const OutputPage(
       {super.key,
       required this.imageBytes,
-      this.crop = 'Tomato',
+      required this.crop,
       this.sample = false,
       this.api});
   @override
@@ -156,10 +156,15 @@ class _OutputPageState extends State<OutputPage> {
                   builder: (_) => AssistantPage(
                       api: api,
                       embedded: false,
-                      crop: widget.crop,
+                      crop: result['status'] == 'crop_mismatch'
+                          ? null
+                          : widget.crop,
+                      resetContext: true,
                       initialQuestion: result['status'] == 'candidate'
                           ? 'The screening suggested ${result['candidates'][0]['condition']} on my ${widget.crop}, but it is unverified. What signs and alternative causes should I check?'
-                          : 'The app could not confirm a screening result for my ${widget.crop}. What should I document before asking an agricultural expert?'))),
+                          : result['status'] == 'crop_mismatch'
+                              ? 'The scan could not confirm the plant identity and flagged a crop mismatch. Do not assume the selected crop or any model match is correct. What details should I provide to identify the plant before discussing disease?'
+                              : 'I selected ${widget.crop}, but the scan is uncertain. What should I document before asking an agricultural expert?'))),
               icon: const Icon(Icons.chat_bubble_outline),
               label: const Text('Ask the plant assistant')),
           const SizedBox(height: 24),

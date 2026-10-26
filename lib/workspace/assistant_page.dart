@@ -9,12 +9,14 @@ class AssistantPage extends StatefulWidget {
   final bool embedded;
   final String? crop;
   final String? initialQuestion;
+  final bool resetContext;
   const AssistantPage(
       {super.key,
       this.api,
       this.embedded = true,
       this.crop,
-      this.initialQuestion});
+      this.initialQuestion,
+      this.resetContext = false});
   @override
   State<AssistantPage> createState() => _AssistantPageState();
 }
@@ -25,6 +27,7 @@ class _AssistantPageState extends State<AssistantPage> {
   List<Map<String, dynamic>> _messages = [];
   bool _loading = true, _busy = false;
   String? _error, _failedQuestion;
+  bool _firstQuestion = true;
   WorkspaceApi get api => widget.api ?? workspaceApi;
   @override
   void initState() {
@@ -58,7 +61,7 @@ class _AssistantPageState extends State<AssistantPage> {
       if (mounted) setState(() => _loading = false);
     }
     if (mounted && widget.initialQuestion != null) {
-      await _send(widget.initialQuestion!);
+      _draft.text = widget.initialQuestion!;
     }
     _bottom();
   }
@@ -80,7 +83,10 @@ class _AssistantPageState extends State<AssistantPage> {
     });
     _bottom();
     try {
-      final reply = await api.ask(text, crop: widget.crop);
+      final reply = await api.ask(text,
+          crop: widget.crop,
+          resetContext: widget.resetContext && _firstQuestion);
+      _firstQuestion = false;
       if (mounted) {
         setState(() => _messages.add(
             {'role': 'assistant', 'content': reply['answer'], 'reply': reply}));

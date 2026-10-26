@@ -149,8 +149,13 @@ class WorkspaceApi {
   Future<Map<String, dynamic>> stats() => _send('GET', 'stats');
   Future<List<Map<String, dynamic>>> messages() async =>
       List<Map<String, dynamic>>.from((await _send('GET', 'chat'))['messages']);
-  Future<Map<String, dynamic>> ask(String question, {String? crop}) =>
-      _send('POST', 'chat', data: {'question': question, 'crop': crop});
+  Future<Map<String, dynamic>> ask(String question,
+          {String? crop, bool resetContext = false}) =>
+      _send('POST', 'chat', data: {
+        'question': question,
+        'crop': crop,
+        'reset_context': resetContext
+      });
   Future<void> clearChat() async {
     await _send('DELETE', 'chat');
   }

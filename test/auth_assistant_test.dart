@@ -22,6 +22,24 @@ class FormApi extends WorkspaceApi {
 }
 
 void main() {
+  testWidgets('Scan handoff stays a draft and resets old crop context on send', (tester) async {
+    Map<String, dynamic>? sent;
+    final api = WorkspaceApi(baseUri: Uri.parse('http://localhost/api/'), client: MockClient((request) async {
+      if (request.method == 'GET') return http.Response('{"messages":[]}', 200);
+      sent = jsonDecode(request.body);
+      return http.Response('{"answer":"Please describe the plant.","sources":[]}', 200);
+    }));
+    addTearDown(api.close);
+    await tester.pumpWidget(MaterialApp(theme: appTheme, home: Scaffold(body: AssistantPage(api: api, initialQuestion: 'The plant identity is unknown. What details should I provide?', resetContext: true))));
+    await tester.pumpAndSettle();
+    expect(sent, isNull);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, contains('identity is unknown'));
+    await tester.tap(find.byTooltip('Send plant question'));
+    await tester.pumpAndSettle();
+    expect(sent?['crop'], isNull);
+    expect(sent?['reset_context'], isTrue);
+  });
+
   testWidgets('Phone login fits without layout overflow', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
