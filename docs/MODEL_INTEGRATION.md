@@ -56,12 +56,16 @@ The app validates the response schema, score ranges, selected crop and API versi
 
 ## Model provenance and evidence
 
-The replacement model remains ConCaPlant / MobileNetV3 Small from [imaflower/plantvillage-mobilenetv3](https://huggingface.co/imaflower/plantvillage-mobilenetv3), pinned to weight revision `d76fe187be1c4c3a5474f835a7a70cd08c7ab085`. This is not the unavailable original research model. The full model card, hashes, source attribution and evaluation plan now belong to the ML repository.
+The active model is Kissan Leaf v1: a newly trained 38-class head on a frozen ImageNet MobileNetV3 Small backbone, using Kaggle PlantVillage v3 colour images. The pinned separate ML repository contains the model card, full evaluation, training pipeline, grouped split manifest and checksummed private release. Held-out lab accuracy is 98.64% on 8,208 images; this does not measure field performance. Dataset license is CC BY-NC-SA 4.0.
 
-It covers 15 classes for tomato, potato and bell pepper. Scores are not calibrated disease probabilities, high scores can be wrong, and there is no reliable non-leaf/unknown-input detector. Ambiguous and crop-mismatch states are interface heuristics, not validated clinical or agronomic decision rules. The two PlantVillage smoke fixtures are from the training dataset family; no independent field accuracy is claimed.
+Scores are calibrated within the held-out lab distribution and are not general diagnostic probabilities. There is no reliable non-leaf/unknown-input detector. The two demonstration fixtures were excluded from training, but remain from the same dataset family.
 
 ## Data and deployment boundary
 
-The ML service does not save images or predictions. The app retains unsaved reviews in bounded memory and writes a re-encoded EXIF-free photo, notes and result to its local SQLite notebook only on explicit save. That notebook remains in this app repository's ignored `server/data` directory and is not migrated to the model repository or synchronized with Firebase.
+The ML service does not save images or predictions. The app retains unsaved reviews in bounded memory and writes a re-encoded EXIF-free photo, notes and result to its local SQLite notebook only on explicit save. That notebook remains in this app repository's ignored `server/data` directory and is not migrated to the model repository or synchronized to Firestore.
 
 Both services bind to loopback and reject unexpected Host/Origin values. Remote ML URLs must use HTTPS. Public hosting still needs authentication, user isolation, retention controls and a separate deployment design.
+
+## Accounts and assistant
+
+The gateway validates ID tokens from the explicitly configured personal Firebase project. Scans, photos, pending predictions and chat history are scoped by Firebase UID. No Firebase service-account key is shipped to Flutter. The model API remains stateless and loopback-only. The chat endpoint forwards question and crop context to the separate ML repository, where curated university-extension guidance is retrieved; the gateway stores only the owning account’s history. See FIREBASE_SETUP.md.

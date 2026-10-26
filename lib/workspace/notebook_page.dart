@@ -76,7 +76,7 @@ class _NotebookPageState extends State<NotebookPage> {
                 icon: const Icon(Icons.refresh))
           ]),
           const Text(
-              'Your latest 200 saved photos, model suggestions and observations. Stored on this local service, separate from your Firebase account.',
+              'Your latest 200 saved photos, model suggestions and observations. Private to your account on this service.',
               style: TextStyle(color: muted)),
           const SizedBox(height: 24),
           TextField(
@@ -116,6 +116,7 @@ class _NotebookPageState extends State<NotebookPage> {
                     leading: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(api.imageUrl(scan['image_url']),
+                            headers: api.imageHeaders,
                             width: 64,
                             height: 64,
                             fit: BoxFit.cover,
@@ -242,6 +243,7 @@ class _NotebookDetailState extends State<NotebookDetail> {
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
                   widget.api.imageUrl(widget.scan['image_url']),
+                  headers: widget.api.imageHeaders,
                   height: 280,
                   fit: BoxFit.contain)),
           const SizedBox(height: 24),

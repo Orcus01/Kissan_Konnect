@@ -96,7 +96,7 @@ class CandidateList extends StatelessWidget {
                   ]),
             )),
         const Text(
-            'Scores compare the 15 trained classes. They are not the probability that your plant has a disease.',
+            'Scores compare the trained classes. They are not the probability that your plant has a disease.',
             style: TextStyle(color: muted, fontSize: 13)),
       ]);
 }

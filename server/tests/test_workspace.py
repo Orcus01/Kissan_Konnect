@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import uuid
 os.environ['KISSAN_DATA_DIR'] = tempfile.mkdtemp(prefix='kissan-app-test-')
 import importlib
 import httpx
@@ -29,6 +30,9 @@ def result(crop='Potato'):
 
 @pytest.fixture(autouse=True)
 def mock_ml(monkeypatch):
+    client.cookies.clear()
+    identity = {'id': str(uuid.uuid4()), 'name':'Gateway Test','email':'test@example.test','provider':'firebase'}
+    monkeypatch.setattr(module.auth, 'current_user', lambda *_: identity)
     def handle(request):
         if request.url.path == '/v1/model':
             return httpx.Response(200, json={'api_version': 1, 'ready': True, 'classes': [], 'name': 'Test model'})

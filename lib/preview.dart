@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'auth/firebase_setup.dart';
 import 'core/app_theme.dart';
-import 'workspace/workspace_page.dart';
+import 'auth/auth_gate.dart';
 
-/// Firebase-free workspace backed by the local inference/notebook service.
-void main() => runApp(const CapturePreview());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseSetup.initialize();
+  runApp(const CapturePreview());
+}
 
 class CapturePreview extends StatelessWidget {
   const CapturePreview({super.key});
@@ -12,6 +16,6 @@ class CapturePreview extends StatelessWidget {
         title: 'Kissan Konnect',
         debugShowCheckedModeBanner: false,
         theme: appTheme,
-        home: const WorkspacePage(),
+        home: const AuthGate(),
       );
 }

@@ -6,6 +6,7 @@ from collections import OrderedDict
 from datetime import datetime, timezone
 import json
 import os
+import re
 from pathlib import Path
 import sqlite3
 import threading
@@ -18,9 +19,15 @@ from starlette.concurrency import run_in_threadpool
 import httpx
 from PIL import Image, ImageOps
 from .ml_client import MLClient
+from . import auth
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = Path(os.environ.get('KISSAN_DATA_DIR', str(ROOT / 'server/data')))
+PROJECT = os.environ.get('KISSAN_FIREBASE_PROJECT_ID', '')
+if PROJECT:
+    if PROJECT == 'seatsandspaces' or not re.fullmatch(r'[a-z][a-z0-9-]{4,62}', PROJECT):
+        raise RuntimeError('Configure a dedicated personal Kissan Konnect Firebase project.')
+    DATA = DATA / PROJECT
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / 'notebook.sqlite3'
 MAX_UPLOAD = 8 * 1024 * 1024
@@ -29,7 +36,14 @@ app = FastAPI(title='Kissan Konnect local workspace', docs_url=None, redoc_url=N
 _pending: OrderedDict = OrderedDict()
 _lock = threading.Lock()
 with sqlite3.connect(DB) as db:
-    db.execute('CREATE TABLE IF NOT EXISTS scans (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, result TEXT NOT NULL, notes TEXT NOT NULL, image BLOB NOT NULL)')
+    db.execute('CREATE TABLE IF NOT EXISTS scans (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, result TEXT NOT NULL, notes TEXT NOT NULL, image BLOB NOT NULL, owner_id TEXT)')
+    if 'owner_id' not in {column[1] for column in db.execute('PRAGMA table_info(scans)')}:
+        db.execute('ALTER TABLE scans ADD COLUMN owner_id TEXT')
+    db.execute('CREATE INDEX IF NOT EXISTS scans_owner ON scans(owner_id)')
+auth.initialize(DB)
+with sqlite3.connect(DB) as db:
+    db.execute('CREATE TABLE IF NOT EXISTS chat_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, owner_id TEXT NOT NULL, role TEXT NOT NULL, content TEXT NOT NULL, payload TEXT, created_at TEXT NOT NULL)')
+    db.execute('CREATE INDEX IF NOT EXISTS chat_owner ON chat_messages(owner_id,id)')
 
 
 @app.middleware('http')
@@ -84,6 +98,40 @@ def canonical_preview(raw: bytes) -> bytes:
         return output.getvalue()
 
 
+@app.post('/api/auth/session')
+async def firebase_session(request: Request, response: Response):
+    data = await json_body(request)
+    return await run_in_threadpool(auth.session, DB, request, response, data)
+
+
+@app.get('/api/auth/me')
+def account(request: Request):
+    return {'user': auth.current_user(DB, request)}
+
+
+@app.post('/api/auth/logout')
+def logout(request: Request, response: Response):
+    return auth.logout(DB, request, response)
+
+
+@app.patch('/api/account')
+async def update_account(request: Request):
+    user = await run_in_threadpool(auth.current_user, DB, request)
+    name = auth.name_value((await json_body(request)).get('name'))
+    with sqlite3.connect(DB) as db:
+        db.execute('UPDATE firebase_profiles SET name=? WHERE id=?', (name, user['id']))
+    return {'user': dict(user, name=name)}
+
+
+@app.get('/api/stats')
+def stats(request: Request):
+    user = auth.current_user(DB, request)
+    with sqlite3.connect(DB) as db:
+        rows = db.execute('SELECT created_at,result FROM scans WHERE owner_id=? ORDER BY created_at DESC', (user['id'],)).fetchall()
+    crops = sorted({json.loads(row[1])['selected_crop'] for row in rows})
+    return {'saved_scans': len(rows), 'crops': crops, 'latest_scan': rows[0][0] if rows else None}
+
+
 @app.get('/api/model')
 async def model_info():
     return await ml_client.metadata()
@@ -91,6 +139,7 @@ async def model_info():
 
 @app.post('/api/predict')
 async def predict(request: Request, crop: str):
+    user = await run_in_threadpool(auth.current_user, DB, request)
     raw = await limited_body(request, MAX_UPLOAD)
     result = await ml_client.predict(raw, crop)
     # App-owned persistence uses a canonical preview, independent of model runtime.
@@ -108,7 +157,7 @@ async def predict(request: Request, crop: str):
                 del _pending[key]
         while len(_pending) >= 32:
             _pending.popitem(last=False)
-        _pending[prediction_id] = (now, result, image)
+        _pending[prediction_id] = (now, result, image, user['id'])
     return result
 
 
@@ -117,14 +166,16 @@ def scan_row(row):
 
 
 @app.get('/api/scans')
-def scans():
+def scans(request: Request):
+    user = auth.current_user(DB, request)
     with sqlite3.connect(DB) as db:
-        rows = db.execute('SELECT id, created_at, result, notes FROM scans ORDER BY created_at DESC LIMIT 200').fetchall()
+        rows = db.execute('SELECT id, created_at, result, notes FROM scans WHERE owner_id=? ORDER BY created_at DESC LIMIT 200', (user['id'],)).fetchall()
     return {'scans': [scan_row(row) for row in rows]}
 
 
 @app.post('/api/scans')
 async def save_scan(request: Request):
+    user = await run_in_threadpool(auth.current_user, DB, request)
     data = await json_body(request)
     notes = clean_notes(data.get('notes', ''))
     scan_id = data.get('prediction_id')
@@ -133,31 +184,33 @@ async def save_scan(request: Request):
     with _lock:
         pending = _pending.get(scan_id)
     with sqlite3.connect(DB) as db:
-        existing = db.execute('SELECT id, created_at, result, notes FROM scans WHERE id=?', (scan_id,)).fetchone()
+        existing = db.execute('SELECT id, created_at, result, notes FROM scans WHERE id=? AND owner_id=?', (scan_id, user['id'])).fetchone()
         if existing:
-            db.execute('UPDATE scans SET notes=? WHERE id=?', (notes, scan_id))
+            db.execute('UPDATE scans SET notes=? WHERE id=? AND owner_id=?', (notes, scan_id, user['id']))
             return scan_row((*existing[:3], notes))
-        if not pending or time.monotonic() - pending[0] > 1800:
+        if not pending or pending[3] != user['id'] or time.monotonic() - pending[0] > 1800:
             raise HTTPException(409, 'Photo review expired. Run the analysis again before saving.')
-        _, result, image = pending
-        db.execute('INSERT INTO scans VALUES (?, ?, ?, ?, ?)', (scan_id, result['created_at'], json.dumps(result), notes, image))
+        _, result, image, _ = pending
+        db.execute('INSERT INTO scans (id,created_at,result,notes,image,owner_id) VALUES (?, ?, ?, ?, ?, ?)', (scan_id, result['created_at'], json.dumps(result), notes, image, user['id']))
     return {'id': scan_id, 'saved': True}
 
 
 @app.patch('/api/scans/{scan_id}')
 async def update_scan(scan_id: str, request: Request):
+    user = await run_in_threadpool(auth.current_user, DB, request)
     data = await json_body(request)
     notes = clean_notes(data.get('notes', ''))
     with sqlite3.connect(DB) as db:
-        if db.execute('UPDATE scans SET notes=? WHERE id=?', (notes, scan_id)).rowcount == 0:
+        if db.execute('UPDATE scans SET notes=? WHERE id=? AND owner_id=?', (notes, scan_id, user['id'])).rowcount == 0:
             raise HTTPException(404, 'Scan not found.')
     return {'updated': True}
 
 
 @app.delete('/api/scans/{scan_id}')
-def delete_scan(scan_id: str):
+def delete_scan(scan_id: str, request: Request):
+    user = auth.current_user(DB, request)
     with sqlite3.connect(DB) as db:
-        if db.execute('DELETE FROM scans WHERE id=?', (scan_id,)).rowcount == 0:
+        if db.execute('DELETE FROM scans WHERE id=? AND owner_id=?', (scan_id, user['id'])).rowcount == 0:
             raise HTTPException(404, 'Scan not found.')
     with _lock:
         _pending.pop(scan_id, None)
@@ -165,12 +218,51 @@ def delete_scan(scan_id: str):
 
 
 @app.get('/api/scans/{scan_id}/image')
-def scan_image(scan_id: str):
+def scan_image(scan_id: str, request: Request):
+    user = auth.current_user(DB, request)
     with sqlite3.connect(DB) as db:
-        row = db.execute('SELECT image FROM scans WHERE id=?', (scan_id,)).fetchone()
+        row = db.execute('SELECT image FROM scans WHERE id=? AND owner_id=?', (scan_id, user['id'])).fetchone()
     if row is None:
         raise HTTPException(404, 'Image not found.')
     return Response(row[0], media_type='image/jpeg')
+
+
+@app.get('/api/chat')
+def chat_history(request: Request):
+    user = auth.current_user(DB, request)
+    with sqlite3.connect(DB) as db:
+        rows = db.execute('SELECT role,content,payload,created_at FROM chat_messages WHERE owner_id=? ORDER BY id DESC LIMIT 100',(user['id'],)).fetchall()
+    return {'messages':[{'role':row[0],'content':row[1],'reply':json.loads(row[2]) if row[2] else None,'created_at':row[3]} for row in reversed(rows)]}
+
+
+@app.post('/api/chat')
+async def plant_chat(request: Request):
+    user = await run_in_threadpool(auth.current_user, DB, request)
+    data = await json_body(request)
+    question = data.get('question')
+    if not isinstance(question,str) or not 2<=len(question.strip())<=2000:
+        raise HTTPException(422,'Ask a plant question between 2 and 2,000 characters.')
+    with sqlite3.connect(DB) as db:
+        rows = db.execute('SELECT role,content,payload FROM chat_messages WHERE owner_id=? ORDER BY id DESC LIMIT 12',(user['id'],)).fetchall()
+    context_crop = data.get('crop')
+    if context_crop is not None and (not isinstance(context_crop,str) or len(context_crop)>80):
+        raise HTTPException(422,'Choose a valid crop.')
+    last_reply = next((json.loads(row[2]) for row in rows if row[0]=='assistant' and row[2]),{})
+    previous_question = next((row[1] for row in rows if row[0]=='user'),None)
+    reply = await ml_client.chat(question.strip(),context_crop or last_reply.get('crop'),previous_question)
+    now = datetime.now(timezone.utc).isoformat()
+    with sqlite3.connect(DB) as db:
+        db.execute('INSERT INTO chat_messages(owner_id,role,content,payload,created_at) VALUES (?,?,?,?,?)',(user['id'],'user',question.strip(),None,now))
+        db.execute('INSERT INTO chat_messages(owner_id,role,content,payload,created_at) VALUES (?,?,?,?,?)',(user['id'],'assistant',reply['answer'],json.dumps(reply),now))
+    return reply
+
+
+@app.delete('/api/chat')
+def clear_chat(request: Request):
+    user = auth.current_user(DB, request)
+    with sqlite3.connect(DB) as db:
+        db.execute('DELETE FROM chat_messages WHERE owner_id=?',(user['id'],))
+    return {'cleared':True}
 
 
 @app.get('/api/weather')

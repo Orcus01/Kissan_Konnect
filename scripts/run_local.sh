@@ -40,7 +40,11 @@ install_requirements "$TASK_VENV" server/requirements.txt
 install_requirements "$TASK_ML_VENV" "$TASK_ML_DIR/requirements.txt"
 "$TASK_ML_VENV/bin/python" "$TASK_ML_DIR/scripts/fetch_model.py"
 "$TASK_FLUTTER" pub get
-"$TASK_FLUTTER" build web -t lib/main.dart --no-wasm-dry-run
+TASK_FIREBASE_ARGS=()
+if [[ -n "${KISSAN_FIREBASE_CONFIG:-}" ]]; then
+  TASK_FIREBASE_ARGS+=("--dart-define-from-file=$KISSAN_FIREBASE_CONFIG")
+fi
+"$TASK_FLUTTER" build web -t lib/main.dart --no-wasm-dry-run "${TASK_FIREBASE_ARGS[@]}"
 exec "$TASK_VENV/bin/python" scripts/run_services.py \
   --ml-dir "$TASK_ML_DIR" --ml-python "$TASK_ML_VENV/bin/python" \
   --port "${KISSAN_PORT:-8765}" --ml-port "${KISSAN_ML_PORT:-8767}"

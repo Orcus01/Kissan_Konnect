@@ -33,6 +33,7 @@ def wait_ready(url, process, expected_version):
 
 def require_free_port(port):
     with socket.socket() as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind(('127.0.0.1', port))
         except OSError as exc:

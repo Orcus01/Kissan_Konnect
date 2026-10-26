@@ -18,3 +18,8 @@ server/data/
 __pycache__/
 .pytest_cache/
 .venv/
+
+# Personal Firebase build configuration
+firebase.personal.json
+android.personal.json
+*-debug.log

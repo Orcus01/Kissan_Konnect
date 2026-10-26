@@ -1,14 +1,17 @@
 # Kissan Konnect
 
-An Android-first Flutter plant-health project with a working local browser workspace and real pretrained-model inference. The original Firebase app is preserved as an opt-in legacy entry path. The separate portfolio repository is unchanged.
+An Android-first Flutter plant-health project with a working local browser workspace and a newly trained Kaggle classifier and Firebase email/password accounts. The separate portfolio repository is unchanged.
 
 ## Working features
 
-- **Leaf screening:** select tomato, potato or bell pepper; use camera/gallery or a clearly labelled dataset sample; run an actual local ONNX classifier with 15 trained classes.
+- **Leaf screening:** select from 14 supported crops; use camera/gallery or a clearly labelled dataset sample; run an actual local ONNX classifier with 38 trained classes.
 - **Traceable results:** top three model scores, crop-mismatch and ambiguous-match states, version/source details, and a copyable screening report. Results are unverified suggestions, not confirmed diagnoses.
-- **Field notebook:** explicitly save a photo/result/notes, search the latest 200 records, edit notes, reload durable images, and delete records. SQLite persistence belongs to this local service, separate from Firebase accounts.
+- **Field notebook:** explicitly save a photo/result/notes, search the latest 200 records, edit notes, reload durable images, and delete records. SQLite records belong to the local service and are isolated by verified Firebase UID.
 - **Crop guide:** searchable observation guidance with university-extension references for early/late blight and bacterial spot. No generated pesticide instructions.
 - **Weather:** city search with location choices, modelled current conditions and a five-day forecast from Open-Meteo. No API key or device-location permission needed; weather requires internet.
+- **Firebase accounts:** sign up, sign in, sign out and request a password reset; notebook and conversation data are isolated per account.
+- **Plant assistant:** sourced, curated care guidance for nine plants with context-aware follow-ups and private conversation history. This is a retrieval assistant, not a generative LLM.
+- **Model report:** actual lab evaluation, data provenance, supported classes and limitations.
 - **Responsive workspace:** desktop navigation rail and phone bottom navigation, useful empty/error states, and explicit model status.
 
 ## Two connected repositories
@@ -34,7 +37,7 @@ To start only the app gateway after building and starting the separate ML servic
 KISSAN_ML_URL=http://127.0.0.1:8767 .venv/bin/python -m server.app
 ```
 
-`lib/main.dart` and `lib/preview.dart` open the same Firebase-free workspace by default. A plain static file server cannot run the complete workspace; use the app gateway and the ML service.
+`lib/main.dart` and `lib/preview.dart` open the same authenticated workspace. Configure a dedicated personal Firebase project as described in [Firebase setup](docs/FIREBASE_SETUP.md). With no configuration, the sign-in screen explains that setup is required; no historical project is selected automatically. A plain static file server cannot run the complete workspace; use the app gateway and the ML service.
 
 ## Android development
 
@@ -59,17 +62,13 @@ The app Python tests use temporary notebooks and an HTTP-boundary mock, without 
 
 ## Model attribution
 
-The replacement model is [imaflower/plantvillage-mobilenetv3](https://huggingface.co/imaflower/plantvillage-mobilenetv3), pinned at `d76fe187be1c4c3a5474f835a7a70cd08c7ab085`. Upstream declares MIT. Its model card, labels, download script and SHA-256 manifest now live in [Kissan_Konnect_ML](https://github.com/Orcus01/Kissan_Konnect_ML). Binary weights and notebook data are not committed. Sample-image provenance is recorded beside the fixtures. No original-model accuracy, field accuracy, adoption, or production-readiness claim is made.
+Kissan Leaf v1 was trained on the colour portion of [Kaggle PlantVillage v3](https://www.kaggle.com/datasets/abdallahalidev/plantvillage-dataset): 54,282 retained images, 38 classes and 14 crops. The MobileNetV3 Small ImageNet backbone is frozen and its classifier head is newly trained. Held-out lab test accuracy is **98.64%**, macro F1 **97.98%**, on 8,208 images. These are not field accuracy estimates. Validation-only temperature scaling is folded into ONNX. Dataset license: **CC BY-NC-SA 4.0**.
 
-## Legacy Firebase app
+The separate ML repository owns acquisition, training, split audit, complete evaluation, versioned weights and the curated assistant. Binary weights and notebook data are not committed. Model assets come from a private checksummed GitHub release; authenticate `gh` with repository access. Known demo fixture images are excluded from this training run. No original paper results or production readiness are claimed.
 
-The existing sign-in, chat, profile and diagnosis screens remain available explicitly:
+## Project separation
 
-```sh
-flutter run --dart-define=LEGACY_FIREBASE_APP=true
-```
-
-Configure your own Firebase project and verify rules/providers before using real accounts. The historical client configuration does not authorize use of the original backend. Live Firebase features and legacy history remain unverified; the new notebook does not silently sync to them. The former embedded weather key was removed from source but its owner still needs to rotate it because Git history retains it.
+Kissan Konnect is a personal project. Firebase configuration must explicitly identify its dedicated project; `seatsandspaces` is blocked in the current auth path. There is no fallback to historical Firebase options. Client accounts, data and repositories are not reused. The former embedded weather key was removed from source; its owner still needs to rotate it because Git history retains it.
 
 Generated build/cache files are already tracked upstream. New ignore rules prevent additions; existing tracked artifact cleanup is a separate follow-up. See the [initial audit](docs/BASELINE_AUDIT.md) for the original implementation findings.
 

@@ -11,7 +11,7 @@ from typing import Literal
 class Candidate(BaseModel):
     model_config = ConfigDict(extra='forbid')
     label: str
-    crop: Literal['Tomato', 'Potato', 'Bell pepper']
+    crop: str = Field(min_length=1, max_length=80)
     condition: str
     score: float = Field(ge=0, le=1)
 
@@ -20,7 +20,7 @@ class Prediction(BaseModel):
     model_config = ConfigDict(extra='forbid')
     api_version: Literal[1]
     status: Literal['candidate', 'uncertain', 'crop_mismatch']
-    selected_crop: Literal['Tomato', 'Potato', 'Bell pepper']
+    selected_crop: str = Field(min_length=1, max_length=80)
     candidates: list[Candidate] = Field(min_length=3, max_length=3)
     elapsed_ms: int = Field(ge=0)
     model_name: str
@@ -42,10 +42,12 @@ class MLClient:
             raise ValueError('Remote model services require HTTPS.')
         self.transport = transport
 
-    async def _request(self, path: str, *, photo: bytes | None = None, crop: str | None = None):
+    async def _request(self, path: str, *, photo: bytes | None = None, crop: str | None = None, data: dict | None = None):
         try:
             async with httpx.AsyncClient(timeout=45, transport=self.transport) as client:
-                if photo is None:
+                if data is not None:
+                    response = await client.post(self.base_url + path, json=data)
+                elif photo is None:
                     response = await client.get(self.base_url + path)
                 else:
                     response = await client.post(self.base_url + path, params={'crop': crop}, content=photo, headers={'Content-Type': 'application/octet-stream'})
@@ -77,3 +79,9 @@ class MLClient:
         if prediction.selected_crop != crop:
             raise HTTPException(502, 'The model returned a result for a different crop. Please retry.')
         return prediction.model_dump()
+
+    async def chat(self, question, context_crop=None, previous_question=None):
+        payload = await self._request('/v1/chat', data={'question':question,'context_crop':context_crop,'previous_question':previous_question})
+        if not isinstance(payload.get('answer'),str) or not isinstance(payload.get('sources'),list):
+            raise HTTPException(502,'The plant assistant returned an invalid response. Please retry.')
+        return payload

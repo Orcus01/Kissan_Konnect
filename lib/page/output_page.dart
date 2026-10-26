@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/workspace_api.dart';
 import '../workspace/common.dart';
+import '../workspace/assistant_page.dart';
 
 class OutputPage extends StatefulWidget {
   final Uint8List imageBytes;
@@ -119,7 +120,7 @@ class _OutputPageState extends State<OutputPage> {
                   style: TextStyle(color: muted))),
         if (result == null) ...[
           const Text(
-              'Use a single, clear leaf from the selected crop. The local model compares 15 trained classes; it cannot reliably reject non-leaf photos or diagnose an unsupported disease.'),
+              'Use a single, clear leaf from the selected crop. The local model compares its trained classes; it cannot reliably reject non-leaf photos or diagnose an unsupported disease.'),
           const SizedBox(height: 12),
           const Text(
               'Processing stays on the local Kissan service. Nothing is added to your notebook until you save.'),
@@ -147,6 +148,17 @@ class _OutputPageState extends State<OutputPage> {
                   : 'This is a research model match, not a confirmed diagnosis. Field performance has not been independently validated. A “healthy” match does not rule out a problem.'),
           const SizedBox(height: 28),
           CandidateList(result: result),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => AssistantPage(
+                      api: api,
+                      embedded: false,
+                      crop: widget.crop,
+                      initialQuestion:
+                          'What should I observe when checking my ${widget.crop} plant?'))),
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Ask the plant assistant')),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),

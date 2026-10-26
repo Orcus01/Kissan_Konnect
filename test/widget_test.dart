@@ -40,6 +40,8 @@ WorkspaceApi mockApi([Future<http.Response> Function(http.Request)? handler]) =>
                     'classes': []
                   }),
                   200);
+            if (request.url.path.endsWith('stats')) return http.Response('{"saved_scans":0,"crops":[]}',200);
+            if (request.url.path.endsWith('chat')) return http.Response('{"messages":[]}',200);
             return http.Response('{"scans":[]}', 200);
           }),
     );
@@ -57,6 +59,8 @@ void main() {
         MaterialApp(theme: appTheme, home: WorkspacePage(api: api)));
     await tester.pumpAndSettle();
     expect(find.text('Model ready'), findsOneWidget);
+    await tester.tap(find.text('Scan').first);
+    await tester.pumpAndSettle();
     expect(find.text('Try a sample leaf'), findsOneWidget);
     await tester.tap(find.text('Notebook'));
     await tester.pumpAndSettle();
@@ -82,6 +86,8 @@ void main() {
         MaterialApp(theme: appTheme, home: WorkspacePage(api: api)));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Weather'));
     await tester.pumpAndSettle();
     expect(find.text('Start with a city.'), findsOneWidget);

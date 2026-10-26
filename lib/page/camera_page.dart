@@ -9,11 +9,13 @@ class CameraPage extends StatefulWidget {
   final bool openCameraOnLoad;
   final bool embedded;
   final WorkspaceApi? api;
+  final List<String> crops;
   const CameraPage(
       {super.key,
       required this.openCameraOnLoad,
       this.embedded = false,
-      this.api});
+      this.api,
+      this.crops = const ['Tomato', 'Potato', 'Bell pepper']});
   @override
   State<CameraPage> createState() => _CameraPageState();
 }
@@ -132,7 +134,7 @@ class _CameraPageState extends State<CameraPage> {
               initialValue: _crop,
               decoration: const InputDecoration(
                   labelText: 'Crop', border: OutlineInputBorder()),
-              items: ['Tomato', 'Potato', 'Bell pepper']
+              items: widget.crops
                   .map((crop) =>
                       DropdownMenuItem(value: crop, child: Text(crop)))
                   .toList(),
@@ -181,7 +183,7 @@ class _CameraPageState extends State<CameraPage> {
           _tip('01', 'Keep the detail',
               'One leaf, natural light, both sides if possible. Avoid blur and busy backgrounds.'),
           _tip('02', 'Know the scope',
-              'Tomato, potato and bell pepper only. The model compares 15 disease and healthy classes.'),
+              'Choose a supported crop. The model compares trained disease and healthy classes; unsupported problems may be missed.'),
           _tip('03', 'Keep a record',
               'Save the photo and observations. Confirm suspected problems with an agricultural adviser.'),
         ];
