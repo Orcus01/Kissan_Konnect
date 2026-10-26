@@ -1,6 +1,10 @@
 # Dedicated personal Firebase accounts
 
-Use a Firebase project that you control for **Kissan Konnect only**. Do not reuse Seats and Spaces or another client project. The current implementation refuses project ID `seatsandspaces`, and does not load historical `firebase_options.dart` as a fallback. No live project has been selected automatically.
+Use a Firebase project that you control for **Kissan Konnect only**. Do not reuse Seats and Spaces or another client project. The current implementation refuses project ID `seatsandspaces`, and does not load historical `firebase_options.dart` as a fallback. The dedicated project **kissan-konnect-personal-261026** (Kissan Konnect Personal) was created under the signed-in owner's account and remains on the **Spark no-cost plan**. Web and Android apps are registered. Email/password authentication is enabled, with localhost and 127.0.0.1 authorized. No billing account was attached.
+
+The local ignored `firebase.personal.json`, `android.personal.json` and `android/app/google-services.json` contain the new project's client configuration. Start the connected personal app with `./scripts/run_personal.sh`. A fresh checkout must fetch its own client settings from this project using Firebase CLI or the console; these files are deliberately not committed. `.firebaserc` selects only this personal project for repository-local Firebase commands.
+
+Live verification passed for a temporary synthetic Firebase signup, password sign-in, Google-signed token verification in the gateway, isolated notebook access, actual ONNX prediction, sourced chat and logout. The temporary account and test records were removed. No real verification or password-reset email was sent.
 
 ## Live setup
 
@@ -33,8 +37,8 @@ Browser photo access uses an opaque HttpOnly SameSite=Strict cookie expiring wit
 
 ## Local emulator verification
 
-The current preview uses project `demo-kissan-konnect`, a loopback Authentication emulator on port 9099, and an isolated notebook directory. These are test accounts, not accounts in a live personal or client project. Emulator sessions deliberately use in-memory browser persistence: sign in again after reloading the page. Live web accounts use Firebase local persistence. Password-reset links stay in emulator output; no real email is sent.
+The previous emulator preview used project `demo-kissan-konnect`, a loopback Authentication emulator on port 9099, and an isolated notebook directory. These are test accounts, not accounts in a live personal or client project. Emulator sessions deliberately use in-memory browser persistence: sign in again after reloading the page. Live web accounts use Firebase local persistence. Password-reset links stay in emulator output; no real email is sent.
 
 The gateway accepts unsigned emulator tokens only when **both** `KISSAN_AUTH_EMULATOR=1` and a `demo-` project ID are set. Never enable that mode for a live project or public service. The normal verifier always checks Google signatures. The app enables emulator use only with a `demo-` project and explicit `KISSAN_AUTH_EMULATOR_HOST` build setting.
 
-Backend tests use synthetic identities and temporary databases; the browser signup/inference/chat checks use the local emulator. Live email/password provider behavior and email delivery remain unverified until the dedicated project is configured. Account creation and password reset in the app contact only the explicitly selected Firebase project.
+Backend tests use synthetic identities and temporary databases; the browser signup/inference/chat checks use the local emulator. Live email/password provider behavior has now been verified on the dedicated project. Email delivery remains untested. Account creation and password reset in the app contact only the explicitly selected Firebase project.

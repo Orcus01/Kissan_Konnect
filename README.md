@@ -23,7 +23,7 @@ Flutter calls the app gateway on port 8765. The gateway calls the independent ML
 
 ## Start the app and model together
 
-Requires Flutter and Python 3.12 (or `uv`, which can provision Python). Tested with Flutter 3.47.8 / Dart 3.13.7.
+Requires Flutter and Python 3.12 (or `uv`, which can provision Python). For the configured personal project, run `./scripts/run_personal.sh`. Tested with Flutter 3.47.8 / Dart 3.13.7.
 
 ```sh
 ./scripts/run_local.sh
@@ -37,7 +37,7 @@ To start only the app gateway after building and starting the separate ML servic
 KISSAN_ML_URL=http://127.0.0.1:8767 .venv/bin/python -m server.app
 ```
 
-`lib/main.dart` and `lib/preview.dart` open the same authenticated workspace. Configure a dedicated personal Firebase project as described in [Firebase setup](docs/FIREBASE_SETUP.md). With no configuration, the sign-in screen explains that setup is required; no historical project is selected automatically. A plain static file server cannot run the complete workspace; use the app gateway and the ML service.
+`lib/main.dart` and `lib/preview.dart` open the same authenticated workspace. The dedicated personal Firebase project `kissan-konnect-personal-261026` is configured locally. Use `./scripts/run_personal.sh`; see [Firebase setup](docs/FIREBASE_SETUP.md) for fresh-checkout configuration. With no configuration, the sign-in screen explains that setup is required; no historical project is selected automatically. A plain static file server cannot run the complete workspace; use the app gateway and the ML service.
 
 ## Android development
 

@@ -23,3 +23,6 @@ __pycache__/
 firebase.personal.json
 android.personal.json
 *-debug.log
+
+# Firebase native client settings are provisioned locally
+android/app/google-services.json
