@@ -93,7 +93,7 @@ class _OverviewPageState extends State<OverviewPage> {
                               letterSpacing: 1.7,
                               fontWeight: FontWeight.w700)),
                       const SizedBox(height: 14),
-                      const Text('Check a leaf.\nKeep the bigger picture.',
+                      const Text('Check your plant.\nKeep the bigger picture.',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 31,
@@ -115,7 +115,7 @@ class _OverviewPageState extends State<OverviewPage> {
                           onPressed: () => widget.navigate(1),
                           icon: const Icon(Icons.document_scanner_outlined,
                               size: 18),
-                          label: const Text('Start a leaf scan'))
+                          label: const Text('Start a plant scan'))
                     ]));
             return ClipRRect(
                 borderRadius: BorderRadius.circular(20),
@@ -133,6 +133,13 @@ class _OverviewPageState extends State<OverviewPage> {
                                     fit: BoxFit.cover))
                           ])));
           }),
+          if (widget.model?['quality_status'] == 'experimental') ...[
+            const SizedBox(height: 18),
+            Text(
+                'Experimental worldwide screening: ${((widget.model!['evaluation']['external']['accuracy'] as num) * 100).toStringAsFixed(1)}% on the separate source holdout. Image matches need expert review.',
+                style:
+                    const TextStyle(color: muted, fontSize: 13, height: 1.6)),
+          ],
           const SizedBox(height: 28),
           Row(children: [
             Expanded(

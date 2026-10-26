@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/workspace_api.dart';
 import 'common.dart';
@@ -144,7 +145,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                       fontWeight: FontWeight.w700, color: ink)),
                           const SizedBox(height: 4),
                           const Text(
-                              'Growing guidance from curated university-extension sources.',
+                              'Fresh answers from a local AI model, with relevant source references.',
                               style: TextStyle(color: muted, fontSize: 13))
                         ])),
                     IconButton(
@@ -174,7 +175,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                             child: CircularProgressIndicator(
                                                 strokeWidth: 2)),
                                         SizedBox(width: 12),
-                                        Text('Finding growing guidance…',
+                                        Text('Writing your plant care answer…',
                                             style: TextStyle(color: muted))
                                       ]));
                                 }
@@ -231,7 +232,7 @@ class _AssistantPageState extends State<AssistantPage> {
               const Padding(
                   padding: EdgeInsets.only(bottom: 16, left: 24, right: 24),
                   child: Text(
-                      'Care guidance, not a diagnosis. No chat messages are sent to a third-party AI service.',
+                      'Generated locally. AI can be wrong; check sources and expert advice.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: muted, fontSize: 11))),
             ])));
@@ -283,7 +284,7 @@ class _AssistantPageState extends State<AssistantPage> {
                 .toList()),
         const SizedBox(height: 32),
         const Text(
-            'Guides available for tomato, potato, bell pepper, basil, mint, grape, strawberry, maize and apple.',
+            'Ask about crops, garden plants or houseplants. Chat coverage is separate from the photo classifier.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: muted))
       ]));
@@ -317,9 +318,28 @@ class _AssistantPageState extends State<AssistantPage> {
                 const Text('Plant assistant',
                     style: TextStyle(
                         fontSize: 13, fontWeight: FontWeight.w700, color: ink)),
+                const SizedBox(height: 6),
+                if (reply?['generative'] == true)
+                  Text(
+                      reply?['grounded'] == true
+                          ? 'AI-generated · reference links supplied'
+                          : 'AI-generated · general guidance, no source cited',
+                      style: const TextStyle(fontSize: 11, color: muted)),
                 const SizedBox(height: 10),
-                SelectableText(message['content'],
-                    style: const TextStyle(height: 1.7, fontSize: 15)),
+                MarkdownBody(
+                    data: message['content'],
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(
+                            height: 1.7, fontSize: 15, color: ink)),
+                    onTapLink: (_, href, __) {
+                      final links = (reply?['sources'] as List? ?? [])
+                          .map((s) => s['url']);
+                      if (href != null && links.contains(href)) {
+                        launchUrl(Uri.parse(href),
+                            mode: LaunchMode.externalApplication);
+                      }
+                    }),
                 if (reply?['sources'] is List) ...[
                   const SizedBox(height: 12),
                   Wrap(
@@ -330,7 +350,10 @@ class _AssistantPageState extends State<AssistantPage> {
                                   Uri.parse(source['url']),
                                   mode: LaunchMode.externalApplication),
                               icon: const Icon(Icons.open_in_new, size: 14),
-                              label: Text(source['title'],
+                              label: Text(
+                                  source['citation_id'] == null
+                                      ? source['title']
+                                      : '[${source['citation_id']}] ${source['title']}',
                                   style: const TextStyle(fontSize: 12))))
                           .toList())
                 ],

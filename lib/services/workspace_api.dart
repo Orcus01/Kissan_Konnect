@@ -51,7 +51,7 @@ class WorkspaceApi {
       final response = await _client
           .send(request)
           .then(http.Response.fromStream)
-          .timeout(const Duration(seconds: 45));
+          .timeout(const Duration(seconds: 90));
       final body = jsonDecode(utf8.decode(response.bodyBytes));
       if (body is! Map<String, dynamic>) throw const FormatException();
       if (response.statusCode < 200 || response.statusCode >= 300) {

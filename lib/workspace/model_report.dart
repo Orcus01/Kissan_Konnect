@@ -49,7 +49,7 @@ void showModelReport(BuildContext context, Map<String, dynamic>? model) {
                                 sectionLabel('Dataset provenance'),
                                 const SizedBox(height: 12),
                                 Text(
-                                    'Kaggle · ${model!['dataset']['slug']}\nVersion ${model['dataset']['version']} · ${model['dataset']['license']}',
+                                    '${model!['dataset']['provider'] ?? 'Dataset'} · ${model['dataset']['slug']}\nVersion ${model['dataset']['version']} · ${model['dataset']['license']}',
                                     style: const TextStyle(height: 1.6)),
                                 TextButton.icon(
                                     onPressed: () => launchUrl(
@@ -57,7 +57,7 @@ void showModelReport(BuildContext context, Map<String, dynamic>? model) {
                                         mode: LaunchMode.externalApplication),
                                     icon:
                                         const Icon(Icons.open_in_new, size: 16),
-                                    label: const Text('Open Kaggle dataset'))
+                                    label: const Text('Open dataset record'))
                               ],
                               const SizedBox(height: 24),
                               sectionLabel('Supported crops and classes'),
@@ -78,13 +78,18 @@ void showModelReport(BuildContext context, Map<String, dynamic>? model) {
                                         .map((c) => ListTile(
                                             dense: true,
                                             title: Text(
-                                                '${c['crop']} · ${c['condition']}')))
+                                                '${c['crop']} · ${c['condition']}'),
+                                            subtitle: c['training_samples'] ==
+                                                    null
+                                                ? null
+                                                : Text(
+                                                    '${c['training_samples']} training images · validation F1: ${c['validation_f1'] == null ? 'unreported' : (c['validation_f1'] as num).toStringAsFixed(2)}')))
                                         .toList()),
                               const SizedBox(height: 24),
                               sectionLabel('What it cannot tell you'),
                               const SizedBox(height: 12),
                               const Text(
-                                  'There is no independent field evaluation or reliable unknown-input detector. A high score can still be wrong, and a healthy match does not rule out a problem. Follow local expert advice before choosing treatment.',
+                                  'There is no prospective field validation or universal unknown-input detector. A high score can still be wrong, and a healthy match does not rule out a problem. Follow local expert advice before choosing treatment.',
                                   style: TextStyle(height: 1.7)),
                               const SizedBox(height: 20),
                               if (model != null)
@@ -107,14 +112,31 @@ void showModelReport(BuildContext context, Map<String, dynamic>? model) {
 List<Widget> _evaluation(Map<String, dynamic> model) {
   final e = model['evaluation'];
   return [
-    sectionLabel('Measured on held-out lab images'),
+    sectionLabel('Measured evaluation'),
+    const SizedBox(height: 8),
+    Text(e['scope'] ?? 'Held-out research split',
+        style: const TextStyle(color: muted, fontSize: 12)),
     const SizedBox(height: 16),
     Wrap(spacing: 32, runSpacing: 20, children: [
       _metric('${((e['test_accuracy'] as num) * 100).toStringAsFixed(2)}%',
-          'Lab-split accuracy'),
+          'Grouped-test accuracy'),
       _metric((e['macro_f1'] as num).toStringAsFixed(3), 'Macro F1'),
       _metric('${e['test_samples']}', 'Held-out images')
     ]),
+    if (e['external'] is Map && e['external']['samples'] != null) ...[
+      const SizedBox(height: 24),
+      sectionLabel('PlantDoc source holdout'),
+      const SizedBox(height: 10),
+      Text(
+          '${((e['external']['accuracy'] as num) * 100).toStringAsFixed(2)}% accuracy on ${e['external']['samples']} images. These source groups were excluded from training and validation.',
+          style: const TextStyle(fontSize: 13, height: 1.6)),
+    ],
+    if (e['novelty'] is Map) ...[
+      const SizedBox(height: 20),
+      const Text(
+          'Unsupported-photo screening uses feature similarity and image-detail checks. It is a conservative heuristic, not a universal unknown-disease detector.',
+          style: TextStyle(fontSize: 12, color: muted, height: 1.6)),
+    ],
     const SizedBox(height: 18),
     Text(
         '${e['unique_images']} unique images after exclusions. Split: ${e['split_counts']['train']} train / ${e['split_counts']['validation']} validation / ${e['split_counts']['test']} test.',
@@ -123,7 +145,7 @@ List<Widget> _evaluation(Map<String, dynamic> model) {
     Text(e['method'] ?? '', style: const TextStyle(fontSize: 13, height: 1.6)),
     const SizedBox(height: 12),
     const Text(
-        'Exact hashes, identical perceptual hashes and filename groups reduce split leakage. They do not prove biological-plant independence. Calibration was fit on validation data; these metrics do not represent field accuracy.',
+        'Exact and perceptual image groups reduce split leakage. They do not prove biological-plant independence. Calibration was fit on validation data; these metrics do not represent field accuracy.',
         style: TextStyle(fontSize: 12, color: muted, height: 1.6)),
     const SizedBox(height: 12),
     Text(

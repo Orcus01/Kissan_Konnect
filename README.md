@@ -4,13 +4,13 @@ An Android-first Flutter plant-health project with a working local browser works
 
 ## Working features
 
-- **Leaf screening:** select from 14 supported crops; use camera/gallery or a clearly labelled dataset sample; run an actual local ONNX classifier with 38 trained classes.
+- **Leaf screening:** select from 36 supported plants; use camera/gallery or a clearly labelled dataset sample; run an actual local ONNX classifier with 149 trained categories.
 - **Traceable results:** top three model scores, crop-mismatch and ambiguous-match states, version/source details, and a copyable screening report. Results are unverified suggestions, not confirmed diagnoses.
 - **Field notebook:** explicitly save a photo/result/notes, search the latest 200 records, edit notes, reload durable images, and delete records. SQLite records belong to the local service and are isolated by verified Firebase UID.
 - **Crop guide:** searchable observation guidance with university-extension references for early/late blight and bacterial spot. No generated pesticide instructions.
 - **Weather:** city search with location choices, modelled current conditions and a five-day forecast from Open-Meteo. No API key or device-location permission needed; weather requires internet.
 - **Firebase accounts:** sign up, sign in, sign out and request a password reset; notebook and conversation data are isolated per account.
-- **Plant assistant:** sourced, curated care guidance for nine plants with context-aware follow-ups and private conversation history. This is a retrieval assistant, not a generative LLM.
+- **Plant assistant:** fresh replies from a local pretrained Qwen3-4B instruction model, reference retrieval, conversational follow-ups and private history. Its conversation breadth is separate from classifier coverage.
 - **Model report:** actual lab evaluation, data provenance, supported classes and limitations.
 - **Responsive workspace:** desktop navigation rail and phone bottom navigation, useful empty/error states, and explicit model status.
 
@@ -29,7 +29,7 @@ Requires Flutter and Python 3.12 (or `uv`, which can provision Python). For the 
 ./scripts/run_local.sh
 ```
 
-This checks or clones the pinned sibling ML repository using your GitHub access, creates separate Python environments, installs each repository's dependencies, verifies the model, builds Flutter web and starts both loopback-only services with readiness checks and coordinated shutdown. Open [the local workspace](http://127.0.0.1:8765). Stop with Ctrl-C. You can set `FLUTTER_BIN`, `KISSAN_VENV`, `KISSAN_ML_DIR`, `KISSAN_ML_VENV`, `KISSAN_PORT` or `KISSAN_ML_PORT` if needed. An existing model checkout is never reset; a different revision requires deliberately updating the lock or selecting a matching checkout.
+This checks or clones the pinned sibling ML repository using your GitHub access, creates separate Python environments, installs each repository's dependencies, verifies the model, builds Flutter web and starts the app, classifier and local language-model services with readiness checks and coordinated shutdown. Open [the local workspace](http://127.0.0.1:8765). Stop with Ctrl-C. You can set `FLUTTER_BIN`, `KISSAN_VENV`, `KISSAN_ML_DIR`, `KISSAN_ML_VENV`, `KISSAN_PORT` or `KISSAN_ML_PORT` if needed. An existing model checkout is never reset; a different revision requires deliberately updating the lock or selecting a matching checkout.
 
 To start only the app gateway after building and starting the separate ML service:
 
@@ -62,9 +62,11 @@ The app Python tests use temporary notebooks and an HTTP-boundary mock, without 
 
 ## Model attribution
 
-Kissan Leaf v1 was trained on the colour portion of [Kaggle PlantVillage v3](https://www.kaggle.com/datasets/abdallahalidev/plantvillage-dataset): 54,282 retained images, 38 classes and 14 crops. The MobileNetV3 Small ImageNet backbone is frozen and its classifier head is newly trained. Held-out lab test accuracy is **98.64%**, macro F1 **97.98%**, on 8,208 images. These are not field accuracy estimates. Validation-only temperature scaling is folded into ONNX. Dataset license: **CC BY-NC-SA 4.0**.
+Kissan Worldwide v2 uses 144,156 retained images from eight source families. The 149-category/36-plant catalogue is finite and includes categories with unspecified conditions. MobileNetV3 Large uses ImageNet V2 features and a newly trained classifier. A partial-backbone fine-tuned candidate was evaluated but lost validation macro F1, so the head candidate was selected.
 
-The separate ML repository owns acquisition, training, split audit, complete evaluation, versioned weights and the curated assistant. Binary weights and notebook data are not committed. Model assets come from a private checksummed GitHub release; authenticate `gh` with repository access. Known demo fixture images are excluded from this training run. No original paper results or production readiness are claimed.
+Grouped test accuracy is **88.29%** (macro F1 0.6511, 21,402 images), but separate PlantDoc source-holdout accuracy is **32.78%** (2,541 images). This substantial gap makes the model experimental. The app displays that result and requires review for image matches. No reliable worldwide diagnosis or universal unknown-input detection is claimed. Prototype similarity and weak-class checks provide conservative review cues.
+
+The independent ML repository owns acquisition, taxonomy, split audit, training, evaluation, checked ONNX release and the local generative assistant. The composite data retains upstream restrictions; no raw images are redistributed. The language model is pretrained Qwen3-4B-Instruct-2507 (Apache 2.0), not a foundation model trained by this project. Its local retrieval index has 29 extension guides; uncited replies are labelled general AI guidance. See the ML repository model card and assistant documentation for limits and reproduction.
 
 ## Project separation
 

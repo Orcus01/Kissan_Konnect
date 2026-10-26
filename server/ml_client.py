@@ -21,6 +21,7 @@ class Prediction(BaseModel):
     api_version: Literal[1]
     status: Literal['candidate', 'uncertain', 'crop_mismatch']
     selected_crop: str = Field(min_length=1, max_length=80)
+    review_reason: str | None = None
     candidates: list[Candidate] = Field(min_length=3, max_length=3)
     elapsed_ms: int = Field(ge=0)
     model_name: str
@@ -44,14 +45,14 @@ class MLClient:
 
     async def _request(self, path: str, *, photo: bytes | None = None, crop: str | None = None, data: dict | None = None):
         try:
-            async with httpx.AsyncClient(timeout=45, transport=self.transport) as client:
+            async with httpx.AsyncClient(timeout=75, transport=self.transport) as client:
                 if data is not None:
                     response = await client.post(self.base_url + path, json=data)
                 elif photo is None:
                     response = await client.get(self.base_url + path)
                 else:
                     response = await client.post(self.base_url + path, params={'crop': crop}, content=photo, headers={'Content-Type': 'application/octet-stream'})
-            if response.status_code in {413, 422}:
+            if response.status_code in {413, 422} or (path == '/v1/chat' and response.status_code == 503):
                 detail = response.json().get('detail')
                 raise HTTPException(response.status_code, detail if isinstance(detail, str) else 'The model could not read this photo.')
             response.raise_for_status()
@@ -80,8 +81,8 @@ class MLClient:
             raise HTTPException(502, 'The model returned a result for a different crop. Please retry.')
         return prediction.model_dump()
 
-    async def chat(self, question, context_crop=None, previous_question=None):
-        payload = await self._request('/v1/chat', data={'question':question,'context_crop':context_crop,'previous_question':previous_question})
+    async def chat(self, question, context_crop=None, previous_question=None, history=None):
+        payload = await self._request('/v1/chat', data={'question':question,'context_crop':context_crop,'previous_question':previous_question,'history':history or []})
         if not isinstance(payload.get('answer'),str) or not isinstance(payload.get('sources'),list):
             raise HTTPException(502,'The plant assistant returned an invalid response. Please retry.')
         return payload

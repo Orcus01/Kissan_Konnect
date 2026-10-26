@@ -46,21 +46,34 @@ def main():
     parser.add_argument('--ml-python', type=Path, required=True)
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--ml-port', type=int, default=8767)
+    parser.add_argument('--llm-python', type=Path)
+    parser.add_argument('--llm-port', type=int, default=8768)
     args = parser.parse_args()
     if args.port == args.ml_port:
         parser.error('The app and ML service need different ports.')
     require_free_port(args.port)
     require_free_port(args.ml_port)
+    if args.llm_python:
+        if args.llm_port in {args.port,args.ml_port}: parser.error('Language model needs its own port.')
+        require_free_port(args.llm_port)
     expected = json.loads((ROOT / 'ml-service.lock.json').read_text())['api_version']
     processes = []
     def stop_signal(_number, _frame):
         raise KeyboardInterrupt()
     signal.signal(signal.SIGTERM, stop_signal)
     try:
-        ml = subprocess.Popen([str(args.ml_python.expanduser().absolute()), '-m', 'model_service.app', '--port', str(args.ml_port)], cwd=args.ml_dir.resolve())
+        environment = dict(os.environ, KISSAN_LLM_URL=f'http://127.0.0.1:{args.llm_port}')
+        if args.llm_python:
+            llm = subprocess.Popen([str(args.llm_python.expanduser().absolute()),
+                str(args.ml_dir.resolve() / 'language_model/server.py'),
+                '--model',str(args.ml_dir.resolve() / 'language_model/weights'),
+                '--port',str(args.llm_port)],cwd=args.ml_dir.resolve())
+            processes.append(llm)
+            wait_ready(f'http://127.0.0.1:{args.llm_port}/health',llm,expected)
+        ml = subprocess.Popen([str(args.ml_python.expanduser().absolute()), '-m', 'model_service.app', '--port', str(args.ml_port)], cwd=args.ml_dir.resolve(), env=environment)
         processes.append(ml)
         wait_ready(f'http://127.0.0.1:{args.ml_port}/health', ml, expected)
-        environment = dict(os.environ, KISSAN_ML_URL=f'http://127.0.0.1:{args.ml_port}')
+        environment = dict(environment, KISSAN_ML_URL=f'http://127.0.0.1:{args.ml_port}')
         app = subprocess.Popen([sys.executable, '-m', 'server.app', '--port', str(args.port)], cwd=ROOT, env=environment)
         processes.append(app)
         wait_ready(f'http://127.0.0.1:{args.port}/api/model', app, expected)
@@ -71,7 +84,7 @@ def main():
                     raise RuntimeError(f'A service stopped (exit {process.returncode}); stopping the other service.')
             time.sleep(.5)
     except KeyboardInterrupt:
-        print('Stopping app and ML service.', flush=True)
+        print('Stopping app, classifier and language-model services.', flush=True)
     finally:
         for process in reversed(processes):
             if process.poll() is None:

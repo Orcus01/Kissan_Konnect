@@ -56,9 +56,9 @@ The app validates the response schema, score ranges, selected crop and API versi
 
 ## Model provenance and evidence
 
-The active model is Kissan Leaf v1: a newly trained 38-class head on a frozen ImageNet MobileNetV3 Small backbone, using Kaggle PlantVillage v3 colour images. The pinned separate ML repository contains the model card, full evaluation, training pipeline, grouped split manifest and checksummed private release. Held-out lab accuracy is 98.64% on 8,208 images; this does not measure field performance. Dataset license is CC BY-NC-SA 4.0.
+The active experimental worldwide model has 149 categories across 36 plants. MobileNetV3 Large's trained head was selected over a partial-backbone fine-tuning candidate by full validation macro F1. It uses 144,156 retained multi-source images with grouped splits and a separate PlantDoc source holdout. Main test accuracy is 88.29%; source-holdout accuracy is 32.78%, so matches require review and worldwide diagnosis is not claimed.
 
-Scores are calibrated within the held-out lab distribution and are not general diagnostic probabilities. There is no reliable non-leaf/unknown-input detector. The two demonstration fixtures were excluded from training, but remain from the same dataset family.
+The catalogue is finite. Feature-prototype similarity, low-detail images, weak-validation classes and unspecified-condition labels trigger review, but there is no validated universal unknown-disease detector. API v1 adds optional review_reason. Complete evaluation, taxonomy, source terms, model card and weights remain in the ML repository.
 
 ## Data and deployment boundary
 
@@ -68,4 +68,6 @@ Both services bind to loopback and reject unexpected Host/Origin values. Remote 
 
 ## Accounts and assistant
 
-The gateway validates ID tokens from the explicitly configured personal Firebase project. Scans, photos, pending predictions and chat history are scoped by Firebase UID. No Firebase service-account key is shipped to Flutter. The model API remains stateless and loopback-only. The chat endpoint forwards question and crop context to the separate ML repository, where curated university-extension guidance is retrieved; the gateway stores only the owning account’s history. See FIREBASE_SETUP.md.
+The gateway validates ID tokens from the explicitly configured personal Firebase project. Scans, photos, pending predictions and chat history are scoped by Firebase UID. No Firebase service-account key is shipped to Flutter. The model API remains stateless and loopback-only. The chat endpoint forwards question and crop context to the separate ML repository, where a local pretrained 4B Qwen instruction model generates a reply with retrieved extension context and the last six account-scoped messages; the gateway stores only the owning account’s history. See FIREBASE_SETUP.md.
+
+The connected launcher supervises the separate local language runtime on port 8768 on Apple Silicon. It verifies pinned model assets and fails explicitly when generation is unavailable. Generated replies may be wrong, and supplied citations are not independent semantic verification.

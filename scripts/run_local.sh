@@ -39,6 +39,17 @@ create_environment "$TASK_ML_VENV"
 install_requirements "$TASK_VENV" server/requirements.txt
 install_requirements "$TASK_ML_VENV" "$TASK_ML_DIR/requirements.txt"
 "$TASK_ML_VENV/bin/python" "$TASK_ML_DIR/scripts/fetch_model.py"
+TASK_LLM_ARGS=()
+if [[ "$(uname -s)" == Darwin && "$(uname -m)" == arm64 ]]; then
+  TASK_LLM_VENV="${KISSAN_LLM_VENV:-$TASK_ML_DIR/.venv-llm}"
+  create_environment "$TASK_LLM_VENV"
+  install_requirements "$TASK_LLM_VENV" "$TASK_ML_DIR/language_model/requirements.txt"
+  "$TASK_LLM_VENV/bin/python" "$TASK_ML_DIR/scripts/fetch_language_model.py"
+  TASK_LLM_ARGS+=(--llm-python "$TASK_LLM_VENV/bin/python")
+fi
+if [[ ! -f "$TASK_ML_DIR/model_service/knowledge/corpus.json" ]]; then
+  "$TASK_ML_VENV/bin/python" "$TASK_ML_DIR/scripts/fetch_knowledge.py" || echo 'Reference refresh failed; using available local reference summaries.' >&2
+fi
 "$TASK_FLUTTER" pub get
 TASK_FIREBASE_ARGS=()
 if [[ -n "${KISSAN_FIREBASE_CONFIG:-}" ]]; then
@@ -47,4 +58,4 @@ fi
 "$TASK_FLUTTER" build web -t lib/main.dart --no-wasm-dry-run "${TASK_FIREBASE_ARGS[@]}"
 exec "$TASK_VENV/bin/python" scripts/run_services.py \
   --ml-dir "$TASK_ML_DIR" --ml-python "$TASK_ML_VENV/bin/python" \
-  --port "${KISSAN_PORT:-8765}" --ml-port "${KISSAN_ML_PORT:-8767}"
+  --port "${KISSAN_PORT:-8765}" --ml-port "${KISSAN_ML_PORT:-8767}" "${TASK_LLM_ARGS[@]}"

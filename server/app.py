@@ -249,7 +249,8 @@ async def plant_chat(request: Request):
         raise HTTPException(422,'Choose a valid crop.')
     last_reply = next((json.loads(row[2]) for row in rows if row[0]=='assistant' and row[2]),{})
     previous_question = next((row[1] for row in rows if row[0]=='user'),None)
-    reply = await ml_client.chat(question.strip(),context_crop or last_reply.get('crop'),previous_question)
+    history=[{'role':row[0],'content':row[1][:900]} for row in reversed(rows[:6])]
+    reply = await ml_client.chat(question.strip(),context_crop or last_reply.get('crop'),previous_question,history)
     now = datetime.now(timezone.utc).isoformat()
     with sqlite3.connect(DB) as db:
         db.execute('INSERT INTO chat_messages(owner_id,role,content,payload,created_at) VALUES (?,?,?,?,?)',(user['id'],'user',question.strip(),None,now))

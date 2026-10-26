@@ -66,7 +66,7 @@ def test_private_chat_context_and_history(clients,monkeypatch):
     a,b=clients
     contexts=[]
     class Assistant:
-        async def chat(self,question,crop,previous):
+        async def chat(self,question,crop,previous,history=None):
             contexts.append((crop,previous))
             return {'answer':'Check soil moisture.','crop':crop or 'Tomato','sources':[],'suggestions':[]}
     monkeypatch.setattr(module,'ml_client',Assistant())

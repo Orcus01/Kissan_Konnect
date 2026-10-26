@@ -104,7 +104,7 @@ class _CameraPageState extends State<CameraPage> {
   Widget build(BuildContext context) {
     final body = workspaceBody([
       sectionLabel('Plant health / leaf screening'),
-      pageTitle(context, 'Scan a crop leaf.'),
+      pageTitle(context, 'Screen a plant photo.'),
       const Text(
           'Choose your crop, add a clear photo, and compare it with a local plant-health model.',
           style: TextStyle(fontSize: 17, color: muted)),

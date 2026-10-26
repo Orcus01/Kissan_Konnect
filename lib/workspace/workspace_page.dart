@@ -157,7 +157,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
                       label: Text(_checking
                           ? 'Connecting…'
                           : _model != null
-                              ? 'Model ready'
+                              ? (_model?['quality_status'] == 'experimental'
+                                  ? 'Research model'
+                                  : 'Model ready')
                               : 'Connect service')),
                 IconButton(
                     tooltip: 'Model details and limitations',

@@ -92,7 +92,7 @@ class _OutputPageState extends State<OutputPage> {
   Widget build(BuildContext context) {
     final result = _result;
     return Scaffold(
-      appBar: AppBar(title: const Text('Leaf review')),
+      appBar: AppBar(title: const Text('Plant photo review')),
       body: workspaceBody([
         sectionLabel(
             '${widget.crop} / ${widget.sample ? 'Dataset demonstration' : 'Your photo'}'),
@@ -120,7 +120,7 @@ class _OutputPageState extends State<OutputPage> {
                   style: TextStyle(color: muted))),
         if (result == null) ...[
           const Text(
-              'Use a single, clear leaf from the selected crop. The local model compares its trained classes; it cannot reliably reject non-leaf photos or diagnose an unsupported disease.'),
+              'Use a clear photo of the affected part of the selected plant. The local model compares its trained classes; it cannot reliably reject non-leaf photos or diagnose an unsupported disease.'),
           const SizedBox(height: 12),
           const Text(
               'Processing stays on the local Kissan service. Nothing is added to your notebook until you save.'),
@@ -141,11 +141,13 @@ class _OutputPageState extends State<OutputPage> {
               ? 'Unverified model suggestion'
               : 'Review needed'),
           const SizedBox(height: 12),
-          Text(result['status'] == 'crop_mismatch'
-              ? 'The strongest match belongs to a different crop. Check the selected crop and retake the photo. Do not use this as a disease result.'
-              : result['status'] == 'uncertain'
-                  ? 'The model did not produce a clear match. Retake a close, well-lit photo and seek expert assessment if symptoms continue.'
-                  : 'This is a research model match, not a confirmed diagnosis. Field performance has not been independently validated. A “healthy” match does not rule out a problem.'),
+          Text(result['review_reason'] is String
+              ? result['review_reason']
+              : result['status'] == 'crop_mismatch'
+                  ? 'The strongest match belongs to a different crop. Check the selected crop and retake the photo. Do not use this as a disease result.'
+                  : result['status'] == 'uncertain'
+                      ? 'The model did not produce a clear match. Retake a close, well-lit photo and seek expert assessment if symptoms continue.'
+                      : 'This is a research model match, not a confirmed diagnosis. Field performance has not been independently validated. A “healthy” match does not rule out a problem.'),
           const SizedBox(height: 28),
           CandidateList(result: result),
           const SizedBox(height: 16),
@@ -155,8 +157,9 @@ class _OutputPageState extends State<OutputPage> {
                       api: api,
                       embedded: false,
                       crop: widget.crop,
-                      initialQuestion:
-                          'What should I observe when checking my ${widget.crop} plant?'))),
+                      initialQuestion: result['status'] == 'candidate'
+                          ? 'The screening suggested ${result['candidates'][0]['condition']} on my ${widget.crop}, but it is unverified. What signs and alternative causes should I check?'
+                          : 'The app could not confirm a screening result for my ${widget.crop}. What should I document before asking an agricultural expert?'))),
               icon: const Icon(Icons.chat_bubble_outline),
               label: const Text('Ask the plant assistant')),
           const SizedBox(height: 24),
