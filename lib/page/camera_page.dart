@@ -23,7 +23,7 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   bool _busy = false;
   String? _error;
-  String? _crop;
+  String _crop = 'Auto detect';
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _pick(ImageSource source) async {
-    if (_busy || _crop == null) return;
+    if (_busy) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -52,7 +52,7 @@ class _CameraPageState extends State<CameraPage> {
       if (!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute<void>(
           builder: (_) =>
-              OutputPage(imageBytes: bytes, crop: _crop!, api: widget.api)));
+              OutputPage(imageBytes: bytes, crop: _crop, api: widget.api)));
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -106,7 +106,7 @@ class _CameraPageState extends State<CameraPage> {
       sectionLabel('Plant health / leaf screening'),
       pageTitle(context, 'Screen a plant photo.'),
       const Text(
-          'Choose your crop, add a clear photo, and compare it with a local plant-health model.',
+          'Add a clear leaf photo, optionally provide a crop hint, and compare it with a local plant-health model.',
           style: TextStyle(fontSize: 17, color: muted)),
       const SizedBox(height: 28),
       LayoutBuilder(builder: (context, constraints) {
@@ -128,15 +128,15 @@ class _CameraPageState extends State<CameraPage> {
             ]));
         final controls =
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          sectionLabel('01 / Choose your crop'),
+          sectionLabel('01 / Identify the plant'),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
               initialValue: _crop,
               decoration: const InputDecoration(
-                  labelText: 'Crop',
+                  labelText: 'Crop (optional hint)',
                   hintText: 'Select your crop',
                   border: OutlineInputBorder()),
-              items: widget.crops
+              items: ['Auto detect', ...widget.crops]
                   .map((crop) =>
                       DropdownMenuItem(value: crop, child: Text(crop)))
                   .toList(),
@@ -189,7 +189,7 @@ class _CameraPageState extends State<CameraPage> {
           _tip('01', 'Keep the detail',
               'One leaf, natural light, both sides if possible. Avoid blur and busy backgrounds.'),
           _tip('02', 'Know the scope',
-              'Choose a supported crop. The model compares trained disease and healthy classes; unsupported problems may be missed.'),
+              'Automatic identification compares 36 trained plants. Unknown plants may be missed. The model compares trained disease and healthy classes; unsupported problems may be missed.'),
           _tip('03', 'Keep a record',
               'Save the photo and observations. Confirm suspected problems with an agricultural adviser.'),
         ];

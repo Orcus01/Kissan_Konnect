@@ -138,7 +138,7 @@ async def model_info():
 
 
 @app.post('/api/predict')
-async def predict(request: Request, crop: str):
+async def predict(request: Request, crop: str = 'Auto detect'):
     user = await run_in_threadpool(auth.current_user, DB, request)
     raw = await limited_body(request, MAX_UPLOAD)
     result = await ml_client.predict(raw, crop)

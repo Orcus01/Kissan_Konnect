@@ -21,6 +21,7 @@ class Prediction(BaseModel):
     api_version: Literal[1]
     status: Literal['candidate', 'uncertain', 'crop_mismatch']
     selected_crop: str = Field(min_length=1, max_length=80)
+    identification: dict | None = None
     review_reason: str | None = None
     candidates: list[Candidate] = Field(min_length=3, max_length=3)
     elapsed_ms: int = Field(ge=0)

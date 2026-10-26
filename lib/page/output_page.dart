@@ -95,7 +95,7 @@ class _OutputPageState extends State<OutputPage> {
       appBar: AppBar(title: const Text('Plant photo review')),
       body: workspaceBody([
         sectionLabel(
-            '${widget.crop} / ${widget.sample ? 'Dataset demonstration' : 'Your photo'}'),
+            '${widget.crop == 'Auto detect' ? 'Automatic plant identification' : widget.crop} / ${widget.sample ? 'Dataset demonstration' : 'Your photo'}'),
         pageTitle(context,
             result == null ? 'Ready to screen.' : candidateTitle(result)),
         ClipRRect(
@@ -137,6 +137,17 @@ class _OutputPageState extends State<OutputPage> {
                   Text(_busy ? 'Running local model…' : 'Run leaf screening')),
         ],
         if (result != null) ...[
+          if (result['identification'] is Map) ...[
+            sectionLabel('Plant identification'),
+            const SizedBox(height: 8),
+            Text(result['identification']['crop'] == null
+                ? 'Plant identity unknown — no clear supported crop match.'
+                : 'Suggested crop: ${result['identification']['crop']} — needs confirmation.'),
+            const Text(
+                'Leaf presence is not independently verified. These are research-model suggestions, not confirmed identification.',
+                style: TextStyle(color: muted)),
+            const SizedBox(height: 20),
+          ],
           sectionLabel(result['status'] == 'candidate'
               ? 'Unverified model suggestion'
               : 'Review needed'),
@@ -156,15 +167,10 @@ class _OutputPageState extends State<OutputPage> {
                   builder: (_) => AssistantPage(
                       api: api,
                       embedded: false,
-                      crop: result['status'] == 'crop_mismatch'
-                          ? null
-                          : widget.crop,
+                      crop: null,
                       resetContext: true,
-                      initialQuestion: result['status'] == 'candidate'
-                          ? 'The screening suggested ${result['candidates'][0]['condition']} on my ${widget.crop}, but it is unverified. What signs and alternative causes should I check?'
-                          : result['status'] == 'crop_mismatch'
-                              ? 'The scan could not confirm the plant identity and flagged a crop mismatch. Do not assume the selected crop or any model match is correct. What details should I provide to identify the plant before discussing disease?'
-                              : 'I selected ${widget.crop}, but the scan is uncertain. What should I document before asking an agricultural expert?'))),
+                      initialQuestion:
+                          'I uploaded a leaf photo. The research model ${result['identification']?['crop'] == null ? 'could not identify the plant' : 'suggested ${result['identification']['crop']}, but this is unconfirmed'}. Do not assume any crop or disease is confirmed. What details should I provide to identify the plant and assess its symptoms?'))),
               icon: const Icon(Icons.chat_bubble_outline),
               label: const Text('Ask the plant assistant')),
           const SizedBox(height: 24),
