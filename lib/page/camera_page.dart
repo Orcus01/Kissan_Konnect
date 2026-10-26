@@ -149,14 +149,14 @@ class _CameraPageState extends State<CameraPage> {
           sectionLabel('02 / Add one leaf photo'),
           const SizedBox(height: 14),
           FilledButton.icon(
-              onPressed: _busy || _crop == null
+              onPressed: _busy
                   ? null
                   : () => _pick(ImageSource.camera),
               icon: const Icon(Icons.camera_alt_outlined),
               label: const Text('Take a photo')),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-              onPressed: _busy || _crop == null
+              onPressed: _busy
                   ? null
                   : () => _pick(ImageSource.gallery),
               icon: const Icon(Icons.photo_library_outlined),
