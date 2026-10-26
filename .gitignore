@@ -1,0 +1,28 @@
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/local.properties
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+android/key.properties
+**/service-account*.json
+**/serviceAccount*.json
+server/data/
+__pycache__/
+.pytest_cache/
+.venv/
+
+# Personal Firebase build configuration
+firebase.personal.json
+android.personal.json
+*-debug.log
+
+# Firebase native client settings are provisioned locally
+android/app/google-services.json

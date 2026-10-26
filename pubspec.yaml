@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_markdown: ^0.7.7+1
   flutter:
     sdk: flutter
 
@@ -81,6 +82,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/samples/
 
   fonts:
     - family: gilroy

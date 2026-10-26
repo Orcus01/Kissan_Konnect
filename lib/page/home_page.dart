@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   String _city = 'Kharar'; // Example city name
   late String _currentTime;
+  Timer? _clock;
 
   @override
   void initState() {
@@ -26,11 +27,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startClock() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    _clock = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _currentTime = _formatTime(DateTime.now());
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _clock?.cancel();
+    _weatherService.dispose();
+    super.dispose();
   }
 
   String _formatTime(DateTime time) {
@@ -40,12 +48,13 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchWeather() async {
     try {
       final data = await _weatherService.fetchWeather(_city);
+      if (!mounted) return;
       setState(() {
         _weatherData = data;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching weather data: $e');
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -89,7 +98,8 @@ class _HomePageState extends State<HomePage> {
       automaticallyImplyLeading: false,
       title: Text(
         'Kissan Konnect',
-        style: TextStyle(color: green, fontWeight: FontWeight.bold, fontSize: 24),
+        style:
+            TextStyle(color: green, fontWeight: FontWeight.bold, fontSize: 24),
       ),
       actions: [
         Padding(
@@ -180,7 +190,7 @@ class _HomePageState extends State<HomePage> {
     final temperature = main['temp'];
     final description = weather['description'];
     final humidity = main['humidity'];
-    final rain = _weatherData?.containsKey('rain') == true 
+    final rain = _weatherData?.containsKey('rain') == true
         ? _weatherData!['rain']['1h'] ?? 0
         : 0;
 
