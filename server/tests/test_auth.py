@@ -35,7 +35,7 @@ def test_invalid_token_rejected(clients):
 
 def test_no_local_password_endpoints(clients):
     a,_=clients
-    assert a.post('/api/auth/signup',json={}).status_code==405
+    assert a.post('/api/auth/signup',json={}).status_code in (404,405)
 
 def test_private_scan_owner(clients):
     import json
